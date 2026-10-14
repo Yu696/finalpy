@@ -2,7 +2,10 @@ pipeline {
     agent any
 
     environment {
-        PYTHON_PATH = '"C:\Users\lenovo\AppData\Local\Programs\Python\Python312\python.exe"'
+        PYTHON_PATH = '"C:\\Users\\lenovo\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"'
+        http_proxy  = "http://127.0.0.1:7897"
+        https_proxy = "http://127.0.0.1:7897"
+        no_proxy    = "localhost,127.0.0.1"
     }
 
     stages {
@@ -10,8 +13,8 @@ pipeline {
             steps {
                 bat """
                     @echo off
-                    echo "=== 验证Python313路径及版本 ==="
-                    ${PYTHON_PATH} --version  // 仅保留此关键验证（成功即证明路径正确）
+                    echo "=== 验证Python路径及版本 ==="
+                    ${PYTHON_PATH} --version
                     echo "Python路径验证通过！"
                 """
             }
@@ -25,7 +28,7 @@ pipeline {
             steps {
                 bat """
                     @echo off
-                    echo "=== 修复Python313的pip环境 ==="
+                    echo "=== 修复Python的pip环境 ==="
                     ${PYTHON_PATH} -m ensurepip --upgrade
                     ${PYTHON_PATH} -m pip --version
                 """
@@ -48,7 +51,7 @@ pipeline {
         stage('Test') {
             steps {
                 bat """
-                    ${PYTHON_PATH} -m pip install pytest
+                    ${PYTHON_PATH} -m pip install pytest pytest-cov
                     ${PYTHON_PATH} -m pytest --cov=app tests/ --cov-report=html
                 """
             }
@@ -76,7 +79,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
-                bat "start ${PYTHON_PATH} app.py"  // 启动Flask应用（按需调整）
+                bat "start ${PYTHON_PATH} app.py"
             }
         }
     }
